@@ -25,7 +25,7 @@ void main(){
     data = malloc(sizeof(double)*numOfData*numOfFeature);
     for(i=0;i<46;i++){
         //sprintf(fnRead,"%s%02d.txt",fnReadFormat,i+1);
-        sprintf(fnRead,"./%s%02d.txt",fnReadFormat,i+1);
+        sprintf(fnRead,"./originData/%s%02d.txt",fnReadFormat,i+1);
         printf("Read[%s]\n",fnRead);
         readData(numOfData,data,fnRead);
         average_calcFeature(data,average,numOfData);
