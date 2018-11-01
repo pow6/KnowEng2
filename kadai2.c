@@ -12,16 +12,16 @@ double oneElement_calcFeature(double data[][numOfFeature],int numOfData,int targ
 void average_calcFeature(double data[][numOfFeature],double average[],int numOfData);
 
 void main(){
-    char fnReadFormat[12]="c",fnWriteFormat[12]="mean";
+    char fnReadFormat[12],fnWriteFormat[12];
     char fnRead[24],fnWrite[24];
-    int numOfData=180,i,j;
+    int numOfData,i,j;
     double (*data)[numOfFeature],average[numOfFeature];
-    //printf("読み込むデータ数：\n");
-    //scanf("%d",&numOfData);
-    //printf("入力ファイルフォーマット（数字前の先頭の文字を入力/c01.txt~c46.txtなら、cを入力）：");
-    //scanf("%s",fnReadFormat);
-    //printf("出力ファイルフォーマット（数字前の先頭の文字を入力/mean01.txt~mean46.txtなら、meanを入力）：");
-    //scanf("%s",fnWriteFormat);
+    printf("読み込むデータ数：\n");
+    scanf("%d",&numOfData);
+    printf("入力ファイルフォーマット（数字前の先頭の文字を入力/c01.txt~c46.txtなら、cを入力）：");
+    scanf("%s",fnReadFormat);
+    printf("出力ファイルフォーマット（数字前の先頭の文字を入力/mean01.txt~mean46.txtなら、meanを入力）：");
+    scanf("%s",fnWriteFormat);
     data = malloc(sizeof(double)*numOfData*numOfFeature);
     for(i=0;i<46;i++){
         //sprintf(fnRead,"%s%02d.txt",fnReadFormat,i+1);
