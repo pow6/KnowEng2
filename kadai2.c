@@ -99,8 +99,8 @@ void calcCovariance(double data[][numOfFeature],double average[],double covarian
     }
     for(i=0;i<numOfData;i++){
         for(j=0;j<numOfFeature;j++){
-            for(z=0;z<numOfFeature;z++){
-                covariance[i][j]=data[z][j]*data[i][j];
+            for(z=0;z<numOfData;z++){
+                covariance[i][j]+=data[z][j]*data[i][j];
             }
             covariance[i][j]=covariance[i][j]/numOfFeature-average[i]*average[j];
         }
