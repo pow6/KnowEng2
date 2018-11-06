@@ -92,17 +92,18 @@ void average_calcFeature(double data[][numOfFeature],double average[]){
 
 //共分散を計算する（各要素ごとに計算）
 void calcCovariance(double data[][numOfFeature],double average[],double covariance[][numOfFeature]){
-    int i,j,z;
+    int k,j,i;
     for(i=0;i<numOfData;i++){
-        for(j=0;j<numOfFeature;j++)
+        for(j=0;j<numOfFeature;j++){
             covariance[i][j]=0;
+        }
     }
     for(i=0;i<numOfData;i++){
         for(j=0;j<numOfFeature;j++){
-            for(z=0;z<numOfData;z++){
-                covariance[i][j]+=data[z][j]*data[i][j];
+            for(k=0;k<numOfData;k++){
+                covariance[i][j]+=data[k][i]*data[k][j];
             }
-            covariance[i][j]=covariance[i][j]/numOfFeature-average[i]*average[j];
+            covariance[i][j]=covariance[i][j]/numOfData-average[i]*average[j];
         }
     }
 }
