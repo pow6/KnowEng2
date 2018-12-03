@@ -1,4 +1,4 @@
-//4J02 s15015 �r�����i
+//4J02 s15015 池口恭司
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -14,7 +14,8 @@ double oneElement_calcFeature(double data[][numOfFeature],int target);
 void average_calcFeature(double data[][numOfFeature],double average[]);
 void calcCovariance(double data[][numOfFeature],double average[],double covariance[][numOfFeature]);
 
-void main(){
+void main()
+{
     char fnReadFormat[12]="c",fnWriteFormat[12]="sigma";
     char fnRead[24],fnWrite[24];
     int i,j;
@@ -31,8 +32,9 @@ void main(){
     }
 }
 
-//�t�@�C������f�[�^��ǂݎ��
-void readData(double data[][numOfFeature],char fileName[]){
+//ファイルからデータを読み取る
+void readData(double data[][numOfFeature],char fileName[])
+{
     FILE *read;
     int i,j;
     fileRead(fileName,read);
@@ -45,8 +47,9 @@ void readData(double data[][numOfFeature],char fileName[]){
     fclose(read);
 }
 
-//�t�@�C���ɔz�����������
-void writeData(double average[],char fileName[]){
+//ファイルに配列を書き込む
+void writeData(double average[],char fileName[])
+{
     FILE *write;
     int i;
     fileWrite(fileName,write);
@@ -57,8 +60,9 @@ void writeData(double average[],char fileName[]){
     fclose(write);
 }
 
-//�t�@�C���ɂQ�����z�����������
-void writeDataTwoDim(double coriance[][numOfFeature],char fileName[]){
+//ファイルに２次元配列を書き込む
+void writeDataTwoDim(double coriance[][numOfFeature],char fileName[])
+{
     FILE *write;
     int i,j;
     fileWrite(fileName,write);
@@ -72,8 +76,9 @@ void writeDataTwoDim(double coriance[][numOfFeature],char fileName[]){
     fclose(write);
 }
 
-//�P�̗v�f���̕��ϓ����ʂ��v�Z
-double oneElement_calcFeature(double data[][numOfFeature],int target){
+//１つの要素分の平均特徴量を計算
+double oneElement_calcFeature(double data[][numOfFeature],int target)
+{
     int i;
     double result=0;
     for(i=0;i<numOfData;i++){
@@ -82,16 +87,18 @@ double oneElement_calcFeature(double data[][numOfFeature],int target){
     return result/numOfData;
 }
 
-//�w�萔�̕������̕��ϓ����ʂ��v�Z(���)
-void average_calcFeature(double data[][numOfFeature],double average[]){
+//指定数の文字分の平均特徴量を計算(代入)
+void average_calcFeature(double data[][numOfFeature],double average[])
+{
     int i;
     for(i=0;i<numOfFeature;i++){
         average[i]=oneElement_calcFeature(data,i);
     }
 }
 
-//�����U���v�Z����i�e�v�f���ƂɌv�Z�j
-void calcCovariance(double data[][numOfFeature],double average[],double covariance[][numOfFeature]){
+//共分散を計算する（各要素ごとに計算）
+void calcCovariance(double data[][numOfFeature],double average[],double covariance[][numOfFeature])
+{
     int k,j,i;
     for(i=0;i<numOfData;i++){
         for(j=0;j<numOfFeature;j++){
@@ -108,3 +115,13 @@ void calcCovariance(double data[][numOfFeature],double average[],double covarian
     }
 }
 
+//固有値・固有ベクトルの計算
+//(196次元+1)個の点→平面が１つ決まる
+//しかし、今回は1〜180個のデータのみ利用する
+//本来であれば、197個ないと固有値・固有ベクトルは求まらないが、計算誤差のため、求まる
+//誤差がある値なので、正規直交系はe1~e180までを利用することにする（基本的には）
+//ただ、求まらない場合もあるため、求まらなくなった時点で計算を打ち切る必要がある
+void calcEigenvalue()
+{
+    
+}
