@@ -140,6 +140,11 @@ void calcEigenvalue(double covariance[][numOfFeature],double eigenvalue[][numOfF
 void oneWord_calcEigenvalue(double eigenvalue[][numOfFeature],double eigenvector[][numOfFeature])
 {
     int i,j;
+    double (*tmp)[numOfFeature];
+    tmpEigVt = calloc(numOfData*numOfFeature,sizeof(double));
+    for(i=0;i<numOfFeature;i++){
+        tmpEigVt[i][i]=1;    //対角行列の作成
+    }
     while(){
 
     }
@@ -149,9 +154,6 @@ int oneWord_calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvect
 {
     int i,j;
     static int counter=0;
-    double (*tmp)[numOfFeature];
-    double valueOfSin,valueOfCos,theta,mulSinSS,mulSinBB,mulSinSB,mulCosSS,mulCosSB,mulCosBB;
-    tmp = calloc(numOfData*numOfFeature,sizeof(double));
     printf("計算数:%d\n",counter);
     for(i=0;i<numOfFeature/2;i++){
         for(j=0;j<numOfFeature/2;j++){
@@ -160,16 +162,6 @@ int oneWord_calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvect
         }
         valueOfCos=cos(theta);
         valueOfSin=sin(theta);
-        mulCosSS=valueOfCos*eigenvalue[small][small];
-        mulCosSB=valueOfCos*eigenvalue[small][big];
-        mulCosBB=valueOfCos*eigenvalue[big][big];
-        mulSinSS=valueOfSin*eigenvalue[small][small];
-        mulSinSB=valueOfSin*eigenvalue[small][big];
-        mulSinBB=valueOfSin*eigenvalue[big][big];
-        tmp[small][small]=valueOfCos*(mulCosSS-mulSinSB)-valueOfSin*(mulCosSB-mulSinBB);
-        tmp[small][big]=valueOfSin*(mulCosSS-mulSinSB)+valueOfCos*(mulCosSB-mulSinBB);
-        tmp[big][small]=tmp[small][big];
-        tmp[big][big]=valueOfSin*(mulSinSS+mulCosSB)+valueOfCos*(mulSinSB+mulCosBB);
     }
     for(i=0;i<numOfFeature/2;i++){
         for(j=0;j<numOfFeature/2;j++){
@@ -186,7 +178,7 @@ int oneWord_calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvect
 void calcProduct(double left[][numOfFeature],double right[][numOfFeature],double result[][numOfFeature])    //行列left * 行列right 
 {
     int i,j,z;
-    for(i=0;i<numOfData;i++){
+    for(i=0;i<numOfFeature;i++){
         for(j=0;j<numOfFeature){
             result[i][j]=0;
             for(z=0;z<numOfFeature;z++){
