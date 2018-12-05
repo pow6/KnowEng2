@@ -6,8 +6,8 @@
 
 #define numOfFeature 196        //特徴量
 #define numOfData 180           //文字データ数
-#define zero 0.01               //ヤコビ法[精度]
-#define maxNumberOfCalc 100   //ヤコビ法[最大計算量]
+#define zero 0.00000001               //ヤコビ法[精度]
+#define maxNumberOfCalc 15000   //ヤコビ法[最大計算量]
 #define fileRead(fileName,fileStream) fileStream=fopen(fileName,"r");if(fileStream==NULL){printf("cannat read file[%s]",fileName);exit(1);}
 #define fileWrite(fileName,fileStream) fileStream=fopen(fileName,"w");if(fileStream==NULL){printf("cannat write file[%s]",fileName);exit(1);}
 
@@ -27,29 +27,30 @@ void calcEigenvalue(double eigenvalue[][numOfFeature],double eigenvector[][numOf
 int calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvector[][numOfFeature],double matrixP[][numOfFeature],double matrixTmp[][numOfFeature]);
 void calcProduct(double left[][numOfFeature],double right[][numOfFeature],double result[][numOfFeature]);
 position_k serchBiggest(double target[][numOfFeature]);
-void createMatrix(double matrixP[][numOfFeature],double eigenvalue[][numOfFeature],int small,int big);
+int createMatrix(double matrixP[][numOfFeature],double eigenvalue[][numOfFeature],int small,int big);
 void turnMatrix(double target[][numOfFeature],int small,int big);
 void copyMatrix(double origin[][numOfFeature],double target[][numOfFeature]);
 int judgeDiagonal(double target[][numOfFeature]);
 
 void main()
 {
-    char fnReadFormat[12]="sigma",fnWriteFormat[12]="vector";
-    char fnRead[24],fnWrite[24];
+    char fnReadFormat[12]="sigma",fnWriteFormat[12]="value",fnWriteFormat2[12]="vector";
+    char fnRead[40],fnWrite[40],fnWrite2[40];
     int i,j;
     double (*eigenvalue)[numOfFeature],(*eigenvector)[numOfFeature];
     eigenvalue = malloc(sizeof(double)*numOfFeature*numOfFeature);
     eigenvector = malloc(sizeof(double)*numOfFeature*numOfFeature);
     
     //課題3では，sigmaxx.txtからデータを読み取り利用することとする
-    i=0;
-//    for(i=0;i<46;i++){
+    for(i=0;i<46;i++){
         sprintf(fnRead,"./sigmaData/%s%02d.txt",fnReadFormat,i+1);
         readData(eigenvalue,fnRead,numOfFeature,numOfFeature);    //eigenvalue にsigmaデータを入れる
         sprintf(fnWrite,"./vectorData/%s%02d.txt",fnWriteFormat,i+1);
+        sprintf(fnWrite2,"./vectorData/%s%02d.txt",fnWriteFormat2,i+1);
         calcEigenvalue(eigenvalue,eigenvector);
         writeDataTwoDim(eigenvalue,fnWrite);
-//    }
+        writeDataTwoDim(eigenvector,fnWrite2);
+    }
 }
 
 //ファイルからデータを読み取る(行数，列数指定可能)
@@ -73,7 +74,7 @@ void dispMatrix(double data[][numOfFeature])
     int i,j;
     for(i=0;i<numOfFeature;i++){
         for(j=0;j<numOfFeature;j++){
-            printf("%.8lf ,",data[i][j]);
+            printf("%.2lf ,",data[i][j]);
         }
         printf("\n");
     }
@@ -199,11 +200,16 @@ int calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvector[][num
     
     //行列A(最終的には固有値となる）：eigenvalueの非対角成分のうち一番大きな値を探す
     position = serchBiggest(eigenvalue);
-    printf("small=%d big=%d[%.4lf]",position.row,position.column,eigenvalue[position.row][position.column]);
+    printf("small=%3d big=%3d[%5.4f]",position.row,position.column,eigenvalue[position.row][position.column]);
 
     //関数serchBiggestでは，右上の部分を探すので，small,bigはこのようになる
     //small => position.row  big => position.column
-    createMatrix(matrixP,eigenvalue,position.row,position.column);
+    //なお，Θの値が0になった場合（-1が返ってくる），計算を打ち切る処理を行う
+    if(createMatrix(matrixP,eigenvalue,position.row,position.column)==-1){
+        printf("計算終了（Θ=0）\n");
+        counter=0;
+        return -1;
+    }
 
     //固有ベクトルを更新する 固有ベクトルは，一番大きい固有値のものになる
     //⇒P_1 * P_2 * P_3 .... P_n-1 * P_n
@@ -220,12 +226,10 @@ int calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvector[][num
     calcProduct(matrixP,eigenvalue,matrixTmp);
     copyMatrix(matrixTmp,eigenvalue);
 
-    //計算終了：-1　計算継続：1をreturn
-    //****************************************
-    //この下のif文処理に，非対角成分が0になったときの正常終了処理も入れる
-    //****************************************
+    //計算強制終了：-1　計算継続：1をreturn
     if(counter>=maxNumberOfCalc){    //計算数が規定値を超えた場合，計算終了
-        printf("計算中止\n");
+        printf("計算中止（計算数が上限に達しました）\n");
+        counter=0;
         return -1;
     }else{
         printf("計算数:%d",counter);
@@ -238,12 +242,14 @@ int calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvector[][num
 void calcProduct(double left[][numOfFeature],double right[][numOfFeature],double result[][numOfFeature])   
 {
     int i,j,z;
+    double tmp;
     for(i=0;i<numOfFeature;i++){
         for(j=0;j<numOfFeature;j++){
-            result[i][j]=0;
+            tmp=0;
             for(z=0;z<numOfFeature;z++){
-                result[i][j]+=left[i][z]*right[z][j];
+                tmp+=left[i][z]*right[z][j];
             }
+            result[i][j]=tmp;
         }
     }
 }
@@ -255,13 +261,11 @@ position_k serchBiggest(double target[][numOfFeature])
     position_k position;
     int i,j;
     double max;
-    max=target[0][1];
-    position.row=0;
-    position.column=1;
+    max=-1;
     for(i=0;i<numOfFeature-1;i++){
         for(j=i+1;j<numOfFeature;j++){
             if(max<fabs(target[i][j])){ //絶対値で比較する
-                max=target[i][j];
+                max=fabs(target[i][j]);
                 position.row=i;
                 position.column=j;
             }
@@ -274,7 +278,7 @@ position_k serchBiggest(double target[][numOfFeature])
 //行列Pは，最初に別関数内（関数oneWord_calcEigenvalue()）にて宣言したmatrixPを利用する
 //matrixPは，単位行列であり，それを更新して使いまわすこととする
 //そのため，前回の場所をstaticに保持して置き，新しい値に更新する際に，もう一度単位行列に戻す処理を行う
-void createMatrix(double matrixP[][numOfFeature],double eigenvalue[][numOfFeature],int small,int big)
+int createMatrix(double matrixP[][numOfFeature],double eigenvalue[][numOfFeature],int small,int big)
 {
     static int pastSmall=0,pastBig=1;    //前回の位置を保存。初回(0,1)なのは，(0,0)にすると1行1列の値が消失するため
     double theta;
@@ -282,14 +286,16 @@ void createMatrix(double matrixP[][numOfFeature],double eigenvalue[][numOfFeatur
     matrixP[pastBig][pastBig]=1;
     matrixP[pastSmall][pastBig]=0;
     matrixP[pastBig][pastSmall]=0;
-    theta=0.5*atan(2*eigenvalue[small][big]/(eigenvalue[big][big]-eigenvalue[small][small]));
-    printf(" theta=%.4lf ass=%.4lf abb=%.4lf abs=%.4lf asb=%.4lf ",theta,eigenvalue[small][small],eigenvalue[big][big],eigenvalue[big][small],eigenvalue[small][big]);
+    theta=0.5*atan(2.0*eigenvalue[small][big]/(eigenvalue[big][big]-eigenvalue[small][small]));
+    printf(" theta=%5.4f ass=%5.4f abb=%5.4f abs=%5.4f asb=%5.4f ",theta,eigenvalue[small][small],eigenvalue[big][big],eigenvalue[big][small],eigenvalue[small][big]);
+    if(fabs(theta)<zero)return -1;
     matrixP[small][small]=cos(theta);
     matrixP[big][big]=matrixP[small][small];
     matrixP[small][big]=sin(theta);
-    matrixP[big][small]=matrixP[small][big]*(-1);
+    matrixP[big][small]=matrixP[small][big]*(-1.0);
     pastSmall = small;
     pastBig = big;
+    return 1;
 }
 
 //行列Pを転置し，行列P^-1にする処理
