@@ -20,7 +20,7 @@ void main(){
     int i,j;
     double (*data)[numOfFeature],average[numOfFeature],(*covariance)[numOfFeature];
     data = malloc(sizeof(double)*numOfData*numOfFeature);
-    covariance = malloc(sizeof(double)*numOfData*numOfFeature);
+    covariance = malloc(sizeof(double)*numOfFeature*numOfFeature);
     for(i=0;i<46;i++){
         sprintf(fnRead,"./originData/%s%02d.txt",fnReadFormat,i+1);
         readData(data,fnRead);
@@ -58,12 +58,13 @@ void writeData(double average[],char fileName[]){
 }
 
 //ƒtƒ@ƒCƒ‹‚É‚QŽŸŒ³”z—ñ‚ð‘‚«ž‚Þ
-void writeDataTwoDim(double coriance[][numOfFeature],char fileName[]){
+void writeDataTwoDim(double coriance[][numOfFeature],char fileName[])
+{
     FILE *write;
     int i,j;
     fileWrite(fileName,write);
     printf("Write[%s]\n",fileName);
-    for(i=0;i<numOfData;i++){
+    for(i=0;i<numOfFeature;i++){
         for(j=0;j<numOfFeature;j++){
             fprintf(write,"%lf ",coriance[i][j]);
         }
@@ -91,14 +92,15 @@ void average_calcFeature(double data[][numOfFeature],double average[]){
 }
 
 //‹¤•ªŽU‚ðŒvŽZ‚·‚éiŠe—v‘f‚²‚Æ‚ÉŒvŽZj
-void calcCovariance(double data[][numOfFeature],double average[],double covariance[][numOfFeature]){
+void calcCovariance(double data[][numOfFeature],double average[],double covariance[][numOfFeature])
+{
     int k,j,i;
-    for(i=0;i<numOfData;i++){
+    for(i=0;i<numOfFeature;i++){
         for(j=0;j<numOfFeature;j++){
             covariance[i][j]=0;
         }
     }
-    for(i=0;i<numOfData;i++){
+    for(i=0;i<numOfFeature;i++){
         for(j=0;j<numOfFeature;j++){
             for(k=0;k<numOfData;k++){
                 covariance[i][j]+=data[k][i]*data[k][j];

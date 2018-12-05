@@ -21,11 +21,10 @@ void main()
     char fnReadFormat[12]="c",fnWriteFormat[12]="sigma";
     char fnRead[24],fnWrite[24];
     int i,j;
-    double (*data)[numOfFeature],average[numOfFeature],(*covariance)[numOfFeature],(*eigenvalue)[numOfFeature],(*eigenvector)[numOfFeature];
+    double (*data)[numOfFeature],average[numOfFeature],(*covariance)[numOfFeature],(*eigenvalue)[numOfFeature];
     data = malloc(sizeof(double)*numOfData*numOfFeature);
-    covariance = malloc(sizeof(double)*numOfFeature*numOfFeature);
+    covariance = malloc(sizeof(double)*numOfData*numOfFeature);
     eigenvalue = malloc(sizeof(double)*numOfData*numOfFeature);
-    eigenvector = malloc(sizeof(double)*numOfData*numOfFeature);
     for(i=0;i<46;i++){
         sprintf(fnRead,"./originData/%s%02d.txt",fnReadFormat,i+1);
         readData(data,fnRead);
@@ -71,7 +70,7 @@ void writeDataTwoDim(double coriance[][numOfFeature],char fileName[])
     int i,j;
     fileWrite(fileName,write);
     printf("Write[%s]\n",fileName);
-    for(i=0;i<numOfFeature;i++){
+    for(i=0;i<numOfData;i++){
         for(j=0;j<numOfFeature;j++){
             fprintf(write,"%lf ",coriance[i][j]);
         }
@@ -104,12 +103,12 @@ void average_calcFeature(double data[][numOfFeature],double average[])
 void calcCovariance(double data[][numOfFeature],double average[],double covariance[][numOfFeature])
 {
     int k,j,i;
-    for(i=0;i<numOfFeature;i++){
+    for(i=0;i<numOfData;i++){
         for(j=0;j<numOfFeature;j++){
             covariance[i][j]=0;
         }
     }
-    for(i=0;i<numOfFeature;i++){
+    for(i=0;i<numOfData;i++){
         for(j=0;j<numOfFeature;j++){
             for(k=0;k<numOfData;k++){
                 covariance[i][j]+=data[k][i]*data[k][j];
@@ -137,22 +136,18 @@ void calcEigenvalue(double covariance[][numOfFeature],double eigenvalue[][numOfF
 }
 
 //一つの文字あたりの固有値の計算処理について、計算を打ち切るなどの判定を行う
-void oneWord_calcEigenvalue(double eigenvalue[][numOfFeature],double eigenvector[][numOfFeature])
+void oneWord_calcEigenvalue(double eigenvalue[][numOfFeature])
 {
-    int i,j;
-    while(){
-
-    }
+    
 }
 
-int oneWord_calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvector[][numOfFeature],int small,int big)  //(i,j)を(small,big)で表す
+int oneWord_calcEigenvalueExe(double eigenvalue[][numOfFeature],int small,int big)  //(i,j)を(small,big)で表す
 {
     int i,j;
     static int counter=0;
     double (*tmp)[numOfFeature];
     double valueOfSin,valueOfCos,theta,mulSinSS,mulSinBB,mulSinSB,mulCosSS,mulCosSB,mulCosBB;
     tmp = calloc(numOfData*numOfFeature,sizeof(double));
-    printf("計算数:%d\n",counter);
     for(i=0;i<numOfFeature/2;i++){
         for(j=0;j<numOfFeature/2;j++){
             tmp[i][j]=eigenvalue[i][j];
@@ -176,24 +171,11 @@ int oneWord_calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvect
             eigenvalue[i][j]=tmp[i][j];
             if(i==j){
             }else{
-
+                
             }
         }
     }
     //計算終了：１　計算継続：０をreturn
-}
-
-void calcProduct(double left[][numOfFeature],double right[][numOfFeature],double result[][numOfFeature])    //行列left * 行列right 
-{
-    int i,j,z;
-    for(i=0;i<numOfData;i++){
-        for(j=0;j<numOfFeature){
-            result[i][j]=0;
-            for(z=0;z<numOfFeature;z++){
-                result[i][j]+=left[i][z]*right[z][j];
-            }
-        }
-    }
 }
 
 //課題4 分母の固有値に+b（定数）を足す必要がある
