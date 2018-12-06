@@ -6,7 +6,7 @@
 
 #define numOfFeature 196        //特徴量
 #define numOfData 180           //文字データ数
-#define zero 0.00000001               //ヤコビ法[目標精度]
+#define zero 0.001               //ヤコビ法[目標精度]
 #define maxNumberOfCalc 10000   //ヤコビ法[最大計算量]
 #define fileRead(fileName,fileStream) fileStream=fopen(fileName,"r");if(fileStream==NULL){printf("cannat read file[%s]",fileName);exit(1);}
 #define fileWrite(fileName,fileStream) fileStream=fopen(fileName,"w");if(fileStream==NULL){printf("cannat write file[%s]",fileName);exit(1);}
@@ -212,7 +212,7 @@ int calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvector[][num
     //small => position.row  big => position.column
     //なお，Θの値が0になった場合（関数createMatrix()から-1が返ってくる），計算を打ち切る処理を行う
     if(createMatrix(matrixP,eigenvalue,position.row,position.column)==-1){
-        printf("計算終了（Θ=0）\n");
+        printf("計算終了（abs=asb=zero）\n");
         counter=0;
         return -1;
     }
@@ -265,7 +265,11 @@ void calcProduct(double left[][numOfFeature],double right[][numOfFeature],double
             for(z=0;z<numOfFeature;z++){
                 tmp+=left[i][z]*right[z][j];
             }
-            result[i][j]=tmp;
+            if(fabs(tmp)<zero){     //目標精度で、丸める
+                result[i][j]=0;
+            }else{
+                result[i][j]=tmp;
+            }
         }
     }
 }
@@ -304,7 +308,7 @@ int createMatrix(double matrixP[][numOfFeature],double eigenvalue[][numOfFeature
     matrixP[pastBig][pastSmall]=0;
     theta=0.5*atan(2.0*eigenvalue[small][big]/(eigenvalue[big][big]-eigenvalue[small][small]));
     printf(" theta=% 6f ass=% 6f abb=% 6f abs=% 6f asb=% 6f ",theta,eigenvalue[small][small],eigenvalue[big][big],eigenvalue[big][small],eigenvalue[small][big]);
-    if(fabs(theta)<zero){
+    if(fabs(eigenvalue[small][big])<zero){  //非対角成分の最大値がzero になった→非対角成分はすべてzero →eigenvalueは、対角行列
         return -1;
     }
     matrixP[small][small]=cos(theta);
