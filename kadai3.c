@@ -18,7 +18,7 @@ typedef struct {
 
 void readData(double data[][numOfFeature],char fileName[],int row,int column);
 void dispMatrix(double data[][numOfFeature]);
-void writeData(double average[],char fileName[]);
+void writeData(double average[],char fileName[],int N);
 void writeDataTwoDim(double coriance[][numOfFeature],char fileName[]);
 double oneElement_calcFeature(double data[][numOfFeature],int target);
 void average_calcFeature(double data[][numOfFeature],double average[]);
@@ -31,27 +31,35 @@ int createMatrix(double matrixP[][numOfFeature],double eigenvalue[][numOfFeature
 void turnMatrix(double target[][numOfFeature],int small,int big);
 void copyMatrix(double origin[][numOfFeature],double target[][numOfFeature]);
 int judgeDiagonal(double target[][numOfFeature]);
+void shellSort(double myData[]);
+void pickDiagonal(double mydata[],double eigenvalue[][numOfFeature]);
+
 
 void main()
 {
     FILE *writeLog;
     fileWrite("./vectorData/output.log",writeLog);
-    char fnReadFormat[12]="sigma",fnWriteFormat[12]="value",fnWriteFormat2[12]="vector";
-    char fnRead[40],fnWrite[40],fnWrite2[40];
+    char fnReadFormat[12]="sigma",fnWriteFormat[12]="value",fnWriteFormat2[12]="vector",fnWriteFormat3[12]="sortvalue";
+    char fnRead[40],fnWrite[40],fnWrite2[40],fnWrite3[40];
     int i,j;
+    double *sortvalue;
     double (*eigenvalue)[numOfFeature],(*eigenvector)[numOfFeature];
     eigenvalue = malloc(sizeof(double)*numOfFeature*numOfFeature);
     eigenvector = malloc(sizeof(double)*numOfFeature*numOfFeature);
-    
+    sortvalue = malloc(sizeof(double)*numOfFeature);
+
     //課題3では，sigmaxx.txtからデータを読み取り利用することとする
     for(i=0;i<46;i++){
         sprintf(fnRead,"./sigmaData/%s%02d.txt",fnReadFormat,i+1);
         readData(eigenvalue,fnRead,numOfFeature,numOfFeature);    //eigenvalue にsigmaデータを入れる
         sprintf(fnWrite,"./vectorData/%s%02d.txt",fnWriteFormat,i+1);
         sprintf(fnWrite2,"./vectorData/%s%02d.txt",fnWriteFormat2,i+1);
+        sprintf(fnWrite3,"./vectorData/%s%02d.txt",fnWriteFormat3,i+1);
         calcEigenvalue(eigenvalue,eigenvector,writeLog);
         writeDataTwoDim(eigenvalue,fnWrite);
         writeDataTwoDim(eigenvector,fnWrite2);
+        shellSort(sortvalue,eigenvalue);
+        writeData(sortvalue,fnWrite3,numOfFeature);
         fprintf(writeLog,"[%d] ",i+1);
     }
     fclose(writeLog);
@@ -84,14 +92,14 @@ void dispMatrix(double data[][numOfFeature])
     }
 }
 
-//ファイルに配列を書き込む（配列は，180）
-void writeData(double average[],char fileName[])
+//ファイルに配列を書き込む（配列数は，任意）
+void writeData(double average[],char fileName[],int N)
 {
     FILE *write;
     int i;
     fileWrite(fileName,write);
     printf("Write[%s]\n",fileName);
-    for(i=0;i<numOfData;i++){
+    for(i=0;i<N;i++){
         fprintf(write,"%lf\n",average[i]);
     }
     fclose(write);
@@ -347,4 +355,37 @@ int judgeDiagonal(double target[][numOfFeature])
         }
     }
     return 1;
+}
+
+//シェルソート
+//numOfFeature文の1次元配列を並び替える
+void shellSort(double myData[],double eigenvalue[][numOfFeature])
+{
+    int i,j,z;
+    int group=1,member,dist,next;
+    pickDiagonal(myData,eigenvalue);
+	while(group*3+1<N)group=group*3+1;	//ペアの個数
+	while(group>=1){
+		member=numOfFeature/group;	//ペアの中の数値の個数
+		for(z=0;z<group;z++){
+			for(i=1;i<=member-1;i++){
+				dist=z+group*i;
+				next=myData[dist];
+				for(j=dist;j>=z+group && myData[j-group] < next;j=j-group){
+					myData[j] = myData[j-group];
+				}
+				myData[j]=next;
+			}
+		}
+		group=group/3;
+	}
+}
+
+//対角行列の対角成分のみを1次元行列に入れる
+void pickDiagonal(double mydata[],double eigenvalue[][numOfFeature])
+{
+    int i;
+    for(i=0;i<numOfFeature;i++){
+        mydata[i]=eigenvalue[i][i];
+    }
 }
