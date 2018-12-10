@@ -3,12 +3,14 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <float.h>
 
 #define numOfFeature 196        //特徴量
 #define numOfData 180           //文字データ数
 #define zero 0.0001             //ヤコビ法[目標精度]
 #define maxNumberOfCalc 30000   //ヤコビ法[最大計算量]
 #define teisuOfB 10             //マハラノビス距離、定数B
+#define teisuOfN 179            //マハラノビス距離，定数N
 #define fileRead(fileName,fileStream) fileStream=fopen(fileName,"r");if(fileStream==NULL){printf("cannat read file[%s]",fileName);exit(1);}
 #define fileWrite(fileName,fileStream) fileStream=fopen(fileName,"w");if(fileStream==NULL){printf("cannat write file[%s]",fileName);exit(1);}
 
@@ -32,38 +34,43 @@ int createMatrix(double matrixP[][numOfFeature],double eigenvalue[][numOfFeature
 void turnMatrix(double target[][numOfFeature],int small,int big);
 void copyMatrix(double origin[][numOfFeature],double target[][numOfFeature]);
 int judgeDiagonal(double target[][numOfFeature]);
-void shellSort(double myData[],double eigenvalue[][numOfFeature]);
+void shellSort(double myData[],double eigenvalue[][numOfFeature],double eigenvector[][numOfFeature]);
 void pickDiagonal(double mydata[],double eigenvalue[][numOfFeature]);
-
+int mahalanobis(double rawData[]);
+double calcMahalanobis(double rawData[],double sortedvalue[],double sortedvector[][numOfFeature],double average[]);
 
 void main()
 {
-    FILE *writeLog;
-    fileWrite("./vectorData/output.log",writeLog);
-    char fnReadFormat[12]="sigma",fnWriteFormat[12]="value",fnWriteFormat2[12]="vector",fnWriteFormat3[12]="sortvalue";
+    FILE *fpResult;
+    FILE *fpRead;
+    fileWrite("./Result.txt",fpResult);
     char fnRead[40],fnWrite[40],fnWrite2[40],fnWrite3[40];
-    int i,j;
-    double *sortvalue;
-    double (*eigenvalue)[numOfFeature],(*eigenvector)[numOfFeature];
-    eigenvalue = malloc(sizeof(double)*numOfFeature*numOfFeature);
-    eigenvector = malloc(sizeof(double)*numOfFeature*numOfFeature);
-    sortvalue = malloc(sizeof(double)*numOfFeature);
-
-    //課題3では，sigmaxx.txtからデータを読み取り利用することとする
+    char chart[]="あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
+    int i,j,z;
+    int word,correct;
+    double rawData[numOfFeature];
     for(i=0;i<46;i++){
-        sprintf(fnRead,"./sigmaData/%s%02d.txt",fnReadFormat,i+1);
-        readData(eigenvalue,fnRead,numOfFeature,numOfFeature);    //eigenvalue にsigmaデータを入れる
-        sprintf(fnWrite,"./vectorData/%s%02d.txt",fnWriteFormat,i+1);
-        sprintf(fnWrite2,"./vectorData/%s%02d.txt",fnWriteFormat2,i+1);
-        sprintf(fnWrite3,"./vectorData/%s%02d.txt",fnWriteFormat3,i+1);
-        calcEigenvalue(eigenvalue,eigenvector,writeLog);
-        writeDataTwoDim(eigenvalue,fnWrite);
-        writeDataTwoDim(eigenvector,fnWrite2);
-        shellSort(sortvalue,eigenvalue);
-        writeData(sortvalue,fnWrite3,numOfFeature);
-        fprintf(writeLog,"[%d] ",i+1);
+        sprintf(fnRead,"./originData/c%02d.txt",i+1);
+        fileRead(fnRead,fpRead);
+        fseek(fpRead,numOfFeature*numOfData,SEEK_SET);  //180個の文字を飛ばし，181個目の文字から
+        correct = 0; //正解した文字数をカウント
+        for(j=0;j<20;j++){
+            for(z=0;z<numOfFeature;z++){
+                fscanf(fpRead,"%lf",&rawData[z]);
+                printf("%lf\n",rawData[z]);
+            }
+            word = mahalanobis(rawData);
+            fprintf(fpResult,"\tc%02d[% 2d文字目] 認識結果：%c(%d) ",i+1,j+1,chart[word],word);
+            if(word == i){
+                fprintf(fpResult,"〇\n");
+                correct++;
+            }else{
+                fprintf(fpResult,"×\n");
+            }
+        }
+        fprintf(fpResult,"【正答率】% 4lf%% (〇：%d　×：%d)\n",(double)correct/20.0*100.0,correct,20-correct);        
     }
-    fclose(writeLog);
+    fclose(fpResult);
 }
 
 //ファイルからデータを読み取る(行数，列数指定可能)
@@ -77,6 +84,19 @@ void readData(double data[][numOfFeature],char fileName[],int row,int column)
         for(i=0;i<column;i++){
             fscanf(read,"%lf",&data[j][i]);
         }
+    }
+    fclose(read);
+}
+
+//ファイルからデータを読み取る（1次元）
+void readDataLine(double data[],char fileName[],int N)
+{
+    FILE *read;
+    int i,j;
+    fileRead(fileName,read);
+    printf("Read[%s]\n",fileName);
+    for(i=0;i<N;i++){
+        fscanf(read,"%lf",&data[i]);
     }
     fclose(read);
 }
@@ -360,10 +380,14 @@ int judgeDiagonal(double target[][numOfFeature])
 
 //シェルソート
 //numOfFeature文の1次元配列を並び替える
-void shellSort(double myData[],double eigenvalue[][numOfFeature])
+void shellSort(double myData[],double eigenvalue[][numOfFeature],double eigenvector[][numOfFeature])
 {
     int i,j,z;
     int group=1,member,dist,next;
+    int saveOrder[196];
+    double tmp[196][196];
+    int nextOrder;
+    for(i=0;i<numOfFeature;i++)saveOrder[i]=i;  //順番をセット
     pickDiagonal(myData,eigenvalue);
 	while(group*3+1<numOfFeature)group=group*3+1;	//ペアの個数
 	while(group>=1){
@@ -372,15 +396,30 @@ void shellSort(double myData[],double eigenvalue[][numOfFeature])
 			for(i=1;i<=member-1;i++){
 				dist=z+group*i;
 				next=myData[dist];
+                nextOrder=saveOrder[dist];
 				for(j=dist;j>=z+group && myData[j-group] < next;j=j-group){
 					myData[j] = myData[j-group];
+                    saveOrder[j] = saveOrder[j-group];
 				}
 				myData[j]=next;
+                saveOrder[j]=nextOrder;
 			}
 		}
 		group=group/3;
 	}
+    for(i=0;i<numOfFeature;i++){
+        for(j=0;j<numOfFeature;j++){
+            tmp[i][j]=eigenvector[saveOrder[i]][j];
+        }
+    }
+    for(i=0;i<numOfFeature;i++){
+        for(j=0;j<numOfFeature;j++){
+            eigenvector[i][j]=tmp[i][j];
+        }
+    }
+
 }
+
 
 //対角行列の対角成分のみを1次元行列に入れる
 void pickDiagonal(double mydata[],double eigenvalue[][numOfFeature])
@@ -391,17 +430,50 @@ void pickDiagonal(double mydata[],double eigenvalue[][numOfFeature])
     }
 }
 
-//マハラノビス距離を計算する
-void mahalanobis(double eigenvalue[][numOfFeature],double eigenvector[][numOfFeature])
+//マハラノビス距離を計算した結果をまとめ，もっともらしい文字を返す。
+//「あ」：0　～　「ん」：45
+int mahalanobis(double rawData[])
 {
-    int i,j,z,k;
-    double d;
-    for(k=0;k<numOfFeature;k++){
-        for(i=0;i<numOfFeature;i++){
-            
+    int result=0; //認識結果の文字を返す
+    int i,j;
+    char fnvalue[40],fnvector[40],fnaverage[40];
+    double min=DBL_MAX,now;
+    double sortedvalue[numOfData];
+    double sortedvector[numOfFeature][numOfFeature],average[numOfData];
+    for(i=0;i<46;i++){
+        sprintf(fnvalue,"./sortedData/sortedValue%02d.txt",i+1);
+        sprintf(fnvector,"./sortedData/sortedVector%02d.txt",i+1);
+        sprintf(fnaverage,"./meanData/mean%02d.txt",i+1);
+        readDataLine(sortedvalue,fnvalue,numOfData);
+        readData(sortedvector,fnvector,numOfFeature,numOfFeature);
+        readDataLine(average,fnaverage,numOfData);
+        now=calcMahalanobis(rawData,sortedvalue,sortedvector,average);
+        if(now<min){
+            min = now;
+            result = i;
         }
     }
-
+    printf("【Finish】\n");
 }
 
+//マハラノビス距離を計算する
+double calcMahalanobis(double rawData[],double sortedvalue[],double sortedvector[][numOfFeature],double average[])
+{
+    int i,j,z,k;
+    double d,child;
+    d=0;
+    for(k=0;k<teisuOfN;k++){
+        child=0;
+        for(i=0;i<numOfFeature;i++){
+            child+=(rawData[i]-average[i])*sortedvector[i][k];
+        }
+        child = child * child;
+        if(sortedvalue[k]>teisuOfB){
+            d += child/sortedvalue[k];
+        }else{
+            d += child/teisuOfB;
+        }
+    }
+    return d;
+}
 
