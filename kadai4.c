@@ -45,21 +45,22 @@ void main()
     FILE *fpRead;
     fileWrite("./Result.txt",fpResult);
     char fnRead[40],fnWrite[40],fnWrite2[40],fnWrite3[40];
-    char chart[]="あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
     int i,j,z;
     int word,correct;
     double rawData[numOfFeature];
     for(i=0;i<46;i++){
+        printf("【%2d/46】\n",i+1);
         sprintf(fnRead,"./originData/c%02d.txt",i+1);
         fileRead(fnRead,fpRead);
         fseek(fpRead,numOfFeature*numOfData,SEEK_SET);  //180個の文字を飛ばし，181個目の文字から
         correct = 0; //正解した文字数をカウント
         for(j=0;j<20;j++){
+            printf("\t%2d/20\n",j+1);
             for(z=0;z<numOfFeature;z++){
                 fscanf(fpRead,"%lf",&rawData[z]);
             }
             word = mahalanobis(rawData);
-            fprintf(fpResult,"\tc%02d[% 2d文字目] 認識結果：%c(%d) ",i+1,j+1,chart[word],word);
+            fprintf(fpResult,"\tc%02d[% 2d文字目] 認識結果：(%d) ",i+1,j+1,word);
             if(word == i){
                 fprintf(fpResult,"〇\n");
                 correct++;
@@ -452,6 +453,7 @@ int mahalanobis(double rawData[])
             min = now;
             result = i;
         }
+        printf("\t\t%2d/46\n",i+1);
     }
     return result;
 }
