@@ -10,7 +10,7 @@
 #define zero 0.0001             //ヤコビ法[目標精度]
 #define maxNumberOfCalc 30000   //ヤコビ法[最大計算量]
 #define teisuOfB 10             //マハラノビス距離、定数B
-#define teisuOfN 179            //マハラノビス距離，定数N
+#define teisuOfN 180            //マハラノビス距離，定数N
 #define fileRead(fileName,fileStream) fileStream=fopen(fileName,"r");if(fileStream==NULL){printf("cannat read file[%s]",fileName);exit(1);}
 #define fileWrite(fileName,fileStream) fileStream=fopen(fileName,"w");if(fileStream==NULL){printf("cannat write file[%s]",fileName);exit(1);}
 
@@ -52,7 +52,7 @@ void main()
         printf("【%2d/46】\n",i+1);
         sprintf(fnRead,"./originData/c%02d.txt",i+1);
         fileRead(fnRead,fpRead);
-        fseek(fpRead,numOfFeature*numOfData,SEEK_SET);  //180個の文字を飛ばし，181個目の文字から
+        fseek(fpRead,numOfFeature*numOfData-1,SEEK_SET);  //180個の文字を飛ばし，181個目の文字から
         correct = 0; //正解した文字数をカウント
         for(j=0;j<20;j++){
             printf("\t%2d/20\n",j+1);
