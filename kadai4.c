@@ -57,7 +57,6 @@ void main()
         for(j=0;j<20;j++){
             for(z=0;z<numOfFeature;z++){
                 fscanf(fpRead,"%lf",&rawData[z]);
-                printf("%lf\n",rawData[z]);
             }
             word = mahalanobis(rawData);
             fprintf(fpResult,"\tc%02d[% 2d•¶Žš–Ú] ”FŽ¯Œ‹‰ÊF%c(%d) ",i+1,j+1,chart[word],word);
@@ -79,7 +78,7 @@ void readData(double data[][numOfFeature],char fileName[],int row,int column)
     FILE *read;
     int i,j;
     fileRead(fileName,read);
-    printf("Read[%s]\n",fileName);
+//    printf("Read[%s]\n",fileName);
     for(j=0;j<row;j++){
         for(i=0;i<column;i++){
             fscanf(read,"%lf",&data[j][i]);
@@ -94,7 +93,7 @@ void readDataLine(double data[],char fileName[],int N)
     FILE *read;
     int i,j;
     fileRead(fileName,read);
-    printf("Read[%s]\n",fileName);
+//    printf("Read[%s]\n",fileName);
     for(i=0;i<N;i++){
         fscanf(read,"%lf",&data[i]);
     }
@@ -448,12 +447,13 @@ int mahalanobis(double rawData[])
         readData(sortedvector,fnvector,numOfFeature,numOfFeature);
         readDataLine(average,fnaverage,numOfData);
         now=calcMahalanobis(rawData,sortedvalue,sortedvector,average);
+        printf("now = %lf    min = %lf \n",now,min);
         if(now<min){
             min = now;
             result = i;
         }
     }
-    printf("yFinishz\n");
+    return result;
 }
 
 //ƒ}ƒnƒ‰ƒmƒrƒX‹——£‚ðŒvŽZ‚·‚é
@@ -464,7 +464,7 @@ double calcMahalanobis(double rawData[],double sortedvalue[],double sortedvector
     d=0;
     for(k=0;k<teisuOfN;k++){
         child=0;
-        for(i=0;i<numOfFeature;i++){
+        for(i=0;i<teisuOfN;i++){
             child+=(rawData[i]-average[i])*sortedvector[i][k];
         }
         child = child * child;
