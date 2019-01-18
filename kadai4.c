@@ -1,16 +1,16 @@
-//4J02 s15015 æ± å£æ­å¸
+//4J02 s15015 ’rŒû‹±i
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
 #include <float.h>
 
-#define numOfFeature 196        //ç‰¹å¾´é‡
-#define numOfData 180           //æ–‡å­—ãƒ‡ãƒ¼ã‚¿æ•°
-#define zero 0.0001             //ãƒ¤ã‚³ãƒ“æ³•[ç›®æ¨™ç²¾åº¦]
-#define maxNumberOfCalc 30000   //ãƒ¤ã‚³ãƒ“æ³•[æœ€å¤§è¨ˆç®—é‡]
-#define teisuOfB 4000             //ãƒãƒãƒ©ãƒãƒ“ã‚¹è·é›¢ã€å®šæ•°B
-#define teisuOfN 180            //ãƒãƒãƒ©ãƒãƒ“ã‚¹è·é›¢ï¼Œå®šæ•°N
+#define numOfFeature 196        //“Á’¥—Ê
+#define numOfData 180           //•¶šƒf[ƒ^”
+#define zero 0.0001             //ƒ„ƒRƒr–@[–Ú•W¸“x]
+#define maxNumberOfCalc 30000   //ƒ„ƒRƒr–@[Å‘åŒvZ—Ê]
+#define teisuOfB 4000             //ƒ}ƒnƒ‰ƒmƒrƒX‹——£A’è”B
+#define teisuOfN 180            //ƒ}ƒnƒ‰ƒmƒrƒX‹——£C’è”N
 #define fileRead(fileName,fileStream) fileStream=fopen(fileName,"r");if(fileStream==NULL){printf("cannat read file[%s]",fileName);exit(1);}
 #define fileWrite(fileName,fileStream) fileStream=fopen(fileName,"w");if(fileStream==NULL){printf("cannat write file[%s]",fileName);exit(1);}
 
@@ -37,7 +37,7 @@ int judgeDiagonal(double target[][numOfFeature]);
 void shellSort(double myData[],double eigenvalue[][numOfFeature],double eigenvector[][numOfFeature]);
 void pickDiagonal(double mydata[],double eigenvalue[][numOfFeature]);
 int mahalanobis(double rawData[]);
-double calcMahalanobis(double rawData[],double sortedvalue[],double sortedvector[][numOfFeature],double average[]);
+double calcMahalanobis(int now,double rawData[],double sortedvalue[],double sortedvector[][numOfFeature],double average[]);
 
 void main()
 {
@@ -46,24 +46,24 @@ void main()
     char resultName[40];
     sprintf(resultName,"./Result%d.txt",teisuOfB);
     fileWrite(resultName,fpResult);
-    char hiragana[][4]={"ã‚","ã„","ã†","ãˆ","ãŠ","ã‹","ã","ã","ã‘","ã“","ã•","ã—","ã™","ã›","ã","ãŸ","ã¡","ã¤","ã¦","ã¨","ãª","ã«","ã¬","ã­","ã®","ã¯","ã²","ãµ","ã¸","ã»","ã¾","ã¿","ã‚€","ã‚","ã‚‚","ã‚„","ã‚†","ã‚ˆ","ã‚‰","ã‚Š","ã‚‹","ã‚Œ","ã‚","ã‚","ã‚’","ã‚“"};
+    char hiragana[][4]={"‚ ","‚¢","‚¤","‚¦","‚¨","‚©","‚«","‚­","‚¯","‚±","‚³","‚µ","‚·","‚¹","‚»","‚½","‚¿","‚Â","‚Ä","‚Æ","‚È","‚É","‚Ê","‚Ë","‚Ì","‚Í","‚Ğ","‚Ó","‚Ö","‚Ù","‚Ü","‚İ","‚Ş","‚ß","‚à","‚â","‚ä","‚æ","‚ç","‚è","‚é","‚ê","‚ë","‚í","‚ğ","‚ñ"};
     char fnRead[40],fnWrite[40],fnWrite2[40],fnWrite3[40];
     int i,j,z;
     int word,correct,allCorrect;
     double rawData[numOfFeature],tmp;
     allCorrect =0;
     for(i=0;i<46;i++){
-        printf("ã€%2d/46ã€‘\n",i+1);
+        printf("y%2d/46z\n",i+1);
         sprintf(fnRead,"./originData/c%02d.txt",i+1);
         fileRead(fnRead,fpRead);
         fseek(fpRead,0,SEEK_SET);
-//        fseek(fpRead,numOfFeature*numOfData,SEEK_SET);  //180å€‹ã®æ–‡å­—ã‚’é£›ã°ã—ï¼Œ181å€‹ç›®ã®æ–‡å­—ã‹ã‚‰
+//        fseek(fpRead,numOfFeature*numOfData,SEEK_SET);  //180ŒÂ‚Ì•¶š‚ğ”ò‚Î‚µC181ŒÂ–Ú‚Ì•¶š‚©‚ç
         for(j=0;j<numOfData;j++){
             for(z=0;z<numOfFeature;z++){
                 fscanf(fpRead,"%lf",&tmp);
             }
         }
-        correct = 0; //æ­£è§£ã—ãŸæ–‡å­—æ•°ã‚’ã‚«ã‚¦ãƒ³ãƒˆ
+        correct = 0; //³‰ğ‚µ‚½•¶š”‚ğƒJƒEƒ“ƒg
         for(j=0;j<20;j++){
             fprintf(stderr, "\r[");
             for(z=0;z<20;z=z+2){
@@ -76,23 +76,23 @@ void main()
 //                printf("[%2d]%lf\n",z+1,rawData[z]);
             }
             word = mahalanobis(rawData);
-            fprintf(fpResult,"\tc%02d[% 2dæ–‡å­—ç›®] èªè­˜çµæœï¼š%s(%d) ",i+1,j+1,hiragana[word],word);
+            fprintf(fpResult,"\tc%02d[% 2d•¶š–Ú] ”F¯Œ‹‰ÊF%s(%d) ",i+1,j+1,hiragana[word],word);
             if(word == i){
-                fprintf(fpResult,"ã€‡\n");
+                fprintf(fpResult,"Z\n");
                 correct++;
             }else{
-                fprintf(fpResult,"Ã—\n");
+                fprintf(fpResult,"~\n");
             }
         }
         printf("\n");
         allCorrect += correct;
-        fprintf(fpResult,"ã€æ­£ç­”ç‡<%s>ã€‘% 4lf%% (ã€‡ï¼š%dã€€Ã—ï¼š%d)\n",hiragana[i],(double)correct/20.0*100.0,correct,20-correct);        
+        fprintf(fpResult,"y³“š—¦<%s>z% 4lf%% (ZF%d@~F%d)\n",hiragana[i],(double)correct/20.0*100.0,correct,20-correct);        
     }
-    fprintf(fpResult,"ã€å…¨ä½“ã®æ­£ç­”ç‡ã€‘% 4lf%%ï¼ˆâ—‹ï¼š%dã€€Ã—ï¼š%dï¼‰\n",(double)allCorrect/(20.0*46.0)*100.0,allCorrect,20*46-allCorrect);
+    fprintf(fpResult,"y‘S‘Ì‚Ì³“š—¦z% 4lf%%i›F%d@~F%dj\n",(double)allCorrect/(20.0*46.0)*100.0,allCorrect,20*46-allCorrect);
     fclose(fpResult);
 }
 
-//ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿å–ã‚‹(è¡Œæ•°ï¼Œåˆ—æ•°æŒ‡å®šå¯èƒ½)
+//ƒtƒ@ƒCƒ‹‚©‚çƒf[ƒ^‚ğ“Ç‚İæ‚é(s”C—ñ”w’è‰Â”\)
 void readData(double data[][numOfFeature],char fileName[],int row,int column)
 {
     FILE *read;
@@ -107,7 +107,7 @@ void readData(double data[][numOfFeature],char fileName[],int row,int column)
     fclose(read);
 }
 
-//ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿å–ã‚‹ï¼ˆ1æ¬¡å…ƒï¼‰
+//ƒtƒ@ƒCƒ‹‚©‚çƒf[ƒ^‚ğ“Ç‚İæ‚éi1ŸŒ³j
 void readDataLine(double data[],char fileName[],int N)
 {
     FILE *read;
@@ -120,7 +120,7 @@ void readDataLine(double data[],char fileName[],int N)
     fclose(read);
 }
 
-//è¡Œåˆ—ã‚’è¡¨ç¤ºã™ã‚‹(é…åˆ—ã¯ï¼Œ196*196)
+//s—ñ‚ğ•\¦‚·‚é(”z—ñ‚ÍC196*196)
 void dispMatrix(double data[][numOfFeature])
 {
     int i,j;
@@ -132,7 +132,7 @@ void dispMatrix(double data[][numOfFeature])
     }
 }
 
-//ãƒ•ã‚¡ã‚¤ãƒ«ã«é…åˆ—ã‚’æ›¸ãè¾¼ã‚€ï¼ˆé…åˆ—æ•°ã¯ï¼Œä»»æ„ï¼‰
+//ƒtƒ@ƒCƒ‹‚É”z—ñ‚ğ‘‚«‚Şi”z—ñ”‚ÍC”CˆÓj
 void writeData(double average[],char fileName[],int N)
 {
     FILE *write;
@@ -145,7 +145,7 @@ void writeData(double average[],char fileName[],int N)
     fclose(write);
 }
 
-//ãƒ•ã‚¡ã‚¤ãƒ«ã«ï¼’æ¬¡å…ƒé…åˆ—ã‚’æ›¸ãè¾¼ã‚€(é…åˆ—ã¯ï¼Œ196*196)
+//ƒtƒ@ƒCƒ‹‚É‚QŸŒ³”z—ñ‚ğ‘‚«‚Ş(”z—ñ‚ÍC196*196)
 void writeDataTwoDim(double coriance[][numOfFeature],char fileName[])
 {
     FILE *write;
@@ -162,7 +162,7 @@ void writeDataTwoDim(double coriance[][numOfFeature],char fileName[])
     fclose(write);
 }
 
-//ï¼‘ã¤ã®è¦ç´ åˆ†ã®å¹³å‡ç‰¹å¾´é‡ã‚’è¨ˆç®—
+//‚P‚Â‚Ì—v‘f•ª‚Ì•½‹Ï“Á’¥—Ê‚ğŒvZ
 double oneElement_calcFeature(double data[][numOfFeature],int target)
 {
     int i;
@@ -173,7 +173,7 @@ double oneElement_calcFeature(double data[][numOfFeature],int target)
     return result/numOfData;
 }
 
-//æŒ‡å®šæ•°ã®æ–‡å­—åˆ†ã®å¹³å‡ç‰¹å¾´é‡ã‚’è¨ˆç®—(ä»£å…¥)
+//w’è”‚Ì•¶š•ª‚Ì•½‹Ï“Á’¥—Ê‚ğŒvZ(‘ã“ü)
 void average_calcFeature(double data[][numOfFeature],double average[])
 {
     int i;
@@ -182,7 +182,7 @@ void average_calcFeature(double data[][numOfFeature],double average[])
     }
 }
 
-//å…±åˆ†æ•£ã‚’è¨ˆç®—ã™ã‚‹ï¼ˆå„è¦ç´ ã”ã¨ã«è¨ˆç®—ï¼‰
+//‹¤•ªU‚ğŒvZ‚·‚éiŠe—v‘f‚²‚Æ‚ÉŒvZj
 void calcCovariance(double data[][numOfFeature],double average[],double covariance[][numOfFeature])
 {
     int k,j,i;
@@ -201,14 +201,14 @@ void calcCovariance(double data[][numOfFeature],double average[],double covarian
     }
 }
 
-//å›ºæœ‰å€¤ãƒ»å›ºæœ‰ãƒ™ã‚¯ãƒˆãƒ«ã®è¨ˆç®—
-//(196æ¬¡å…ƒ+1)å€‹ã®ç‚¹â†’å¹³é¢ãŒï¼‘ã¤æ±ºã¾ã‚‹
-//ã—ã‹ã—ã€ä»Šå›ã¯1~180å€‹ã®ãƒ‡ãƒ¼ã‚¿ã®ã¿åˆ©ç”¨ã™ã‚‹
-//æœ¬æ¥ã§ã‚ã‚Œã°ã€197å€‹ãªã„ã¨å›ºæœ‰å€¤ãƒ»å›ºæœ‰ãƒ™ã‚¯ãƒˆãƒ«ã¯æ±‚ã¾ã‚‰ãªã„ãŒã€è¨ˆç®—èª¤å·®ã®ãŸã‚ã€æ±‚ã¾ã‚‹
-//èª¤å·®ãŒã‚ã‚‹å€¤ãªã®ã§ã€æ­£è¦ç›´äº¤ç³»ã¯e1~e180ã¾ã§ã‚’åˆ©ç”¨ã™ã‚‹ã“ã¨ã«ã™ã‚‹ï¼ˆåŸºæœ¬çš„ã«ã¯ï¼‰
-//ãŸã ã€æ±‚ã¾ã‚‰ãªã„å ´åˆã‚‚ã‚ã‚‹ãŸã‚ã€æ±‚ã¾ã‚‰ãªããªã£ãŸæ™‚ç‚¹ã§è¨ˆç®—ã‚’æ‰“ã¡åˆ‡ã‚‹å¿…è¦ãŒã‚ã‚‹
+//ŒÅ—L’lEŒÅ—LƒxƒNƒgƒ‹‚ÌŒvZ
+//(196ŸŒ³+1)ŒÂ‚Ì“_¨•½–Ê‚ª‚P‚ÂŒˆ‚Ü‚é
+//‚µ‚©‚µA¡‰ñ‚Í1~180ŒÂ‚Ìƒf[ƒ^‚Ì‚İ—˜—p‚·‚é
+//–{—ˆ‚Å‚ ‚ê‚ÎA197ŒÂ‚È‚¢‚ÆŒÅ—L’lEŒÅ—LƒxƒNƒgƒ‹‚Í‹‚Ü‚ç‚È‚¢‚ªAŒvZŒë·‚Ì‚½‚ßA‹‚Ü‚é
+//Œë·‚ª‚ ‚é’l‚È‚Ì‚ÅA³‹K’¼ŒğŒn‚Íe1~e180‚Ü‚Å‚ğ—˜—p‚·‚é‚±‚Æ‚É‚·‚éiŠî–{“I‚É‚Íj
+//‚½‚¾A‹‚Ü‚ç‚È‚¢ê‡‚à‚ ‚é‚½‚ßA‹‚Ü‚ç‚È‚­‚È‚Á‚½“_‚ÅŒvZ‚ğ‘Å‚¿Ø‚é•K—v‚ª‚ ‚é
 
-//å›ºæœ‰å€¤ã®è¨ˆç®—å‡¦ç†ã«ã¤ã„ã¦ã€è¨ˆç®—ã‚’æ‰“ã¡åˆ‡ã‚‹ãªã©ã®åˆ¤å®šã‚’è¡Œã†
+//ŒÅ—L’l‚ÌŒvZˆ—‚É‚Â‚¢‚ÄAŒvZ‚ğ‘Å‚¿Ø‚é‚È‚Ç‚Ì”»’è‚ğs‚¤
 void calcEigenvalue(double eigenvalue[][numOfFeature],double eigenvector[][numOfFeature],FILE *writeLog)
 {
     clock_t start,end;
@@ -220,30 +220,30 @@ void calcEigenvalue(double eigenvalue[][numOfFeature],double eigenvector[][numOf
         for(j=0;j<numOfFeature;j++){
             eigenvector[i][j]=0;
         }
-        matrixP[i][i]=1;    //å¯¾è§’è¡Œåˆ—ã®ä½œæˆ
+        matrixP[i][i]=1;    //‘ÎŠps—ñ‚Ìì¬
         eigenvector[i][i]=1;
     }
     start = clock();
     while(calcEigenvalueExe(eigenvalue,eigenvector,matrixP,matrixTmp,writeLog)==1){
         end = clock();
-        printf("  å®Ÿè¡Œæ™‚é–“ï¼š%.2fç§’\n",(double)(end-start)/CLOCKS_PER_SEC);
+        printf("  ÀsŠÔF%.2f•b\n",(double)(end-start)/CLOCKS_PER_SEC);
     }
-    fprintf(writeLog," å®Ÿè¡Œæ™‚é–“%.2fç§’ \n",(double)(end-start)/CLOCKS_PER_SEC);
+    fprintf(writeLog," ÀsŠÔ%.2f•b \n",(double)(end-start)/CLOCKS_PER_SEC);
     free(matrixP);
     free(matrixTmp);
 }
 
-//å›ºæœ‰å€¤ã®è¨ˆç®—å‡¦ç†ã‚’1å›è¡Œã†
+//ŒÅ—L’l‚ÌŒvZˆ—‚ğ1‰ñs‚¤
 int calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvector[][numOfFeature],double matrixP[][numOfFeature],double matrixTmp[][numOfFeature],FILE *writeLog)
 {
     int i,j;
-    int small,big;  //(i,j)ã‚’(small,big)ã§è¡¨ã™
-    /*è¡Œåˆ—P
+    int small,big;  //(i,j)‚ğ(small,big)‚Å•\‚·
+    /*s—ñP
      *      ____small____ big ____
      *      ______________________
-     * small____ cosÎ¸____ sinÎ˜____
+     * small____ cosƒÆ____ sinƒ¦____
      *      ______________________
-     *  big ____-sinÎ¸____ cosÎ˜____
+     *  big ____-sinƒÆ____ cosƒ¦____
      *      ______________________
      * small<big
     */
@@ -251,27 +251,27 @@ int calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvector[][num
     position_k position;
     counter++;
     
-    //è¡Œåˆ—A(æœ€çµ‚çš„ã«ã¯å›ºæœ‰å€¤ã¨ãªã‚‹ï¼‰ï¼šeigenvalueã®éå¯¾è§’æˆåˆ†ã®ã†ã¡ä¸€ç•ªå¤§ããªå€¤ã‚’æ¢ã™
+    //s—ñA(ÅI“I‚É‚ÍŒÅ—L’l‚Æ‚È‚éjFeigenvalue‚Ì”ñ‘ÎŠp¬•ª‚Ì‚¤‚¿ˆê”Ô‘å‚«‚È’l‚ğ’T‚·
     position = serchBiggest(eigenvalue);
     printf("small=%3d big=%3d[% 6f]",position.row,position.column,eigenvalue[position.row][position.column]);
 
-    //é–¢æ•°serchBiggestã§ã¯ï¼Œå³ä¸Šã®éƒ¨åˆ†ã‚’æ¢ã™ã®ã§ï¼Œsmall,bigã¯ã“ã®ã‚ˆã†ã«ãªã‚‹
+    //ŠÖ”serchBiggest‚Å‚ÍC‰Eã‚Ì•”•ª‚ğ’T‚·‚Ì‚ÅCsmall,big‚Í‚±‚Ì‚æ‚¤‚É‚È‚é
     //small => position.row  big => position.column
-    //ãªãŠï¼ŒÎ˜ã®å€¤ãŒ0ã«ãªã£ãŸå ´åˆï¼ˆé–¢æ•°createMatrix()ã‹ã‚‰-1ãŒè¿”ã£ã¦ãã‚‹ï¼‰ï¼Œè¨ˆç®—ã‚’æ‰“ã¡åˆ‡ã‚‹å‡¦ç†ã‚’è¡Œã†
+    //‚È‚¨Cƒ¦‚Ì’l‚ª0‚É‚È‚Á‚½ê‡iŠÖ”createMatrix()‚©‚ç-1‚ª•Ô‚Á‚Ä‚­‚éjCŒvZ‚ğ‘Å‚¿Ø‚éˆ—‚ğs‚¤
     if(createMatrix(matrixP,eigenvalue,position.row,position.column)==-1){
-        printf("è¨ˆç®—çµ‚äº†ï¼ˆabs=asb=zeroï¼‰\n");
-        fprintf(writeLog,"è¨ˆç®—çµ‚äº†ï¼ˆabs=asb=zeroï¼‰");
+        printf("ŒvZI—¹iabs=asb=zeroj\n");
+        fprintf(writeLog,"ŒvZI—¹iabs=asb=zeroj");
         counter=0;
         return -1;
     }
 
-    //å›ºæœ‰ãƒ™ã‚¯ãƒˆãƒ«ã‚’æ›´æ–°ã™ã‚‹ å›ºæœ‰ãƒ™ã‚¯ãƒˆãƒ«ã¯ï¼Œä¸€ç•ªå¤§ãã„å›ºæœ‰å€¤ã®ã‚‚ã®ã«ãªã‚‹
-    //â‡’P_1 * P_2 * P_3 .... P_n-1 * P_n
+    //ŒÅ—LƒxƒNƒgƒ‹‚ğXV‚·‚é ŒÅ—LƒxƒNƒgƒ‹‚ÍCˆê”Ô‘å‚«‚¢ŒÅ—L’l‚Ì‚à‚Ì‚É‚È‚é
+    //ËP_1 * P_2 * P_3 .... P_n-1 * P_n
     calcProduct(eigenvector,matrixP,matrixTmp);
     copyMatrix(matrixTmp,eigenvector);
    
-    //å›ºæœ‰å€¤ã‚’æ›´æ–°ã™ã‚‹
-    //â‡’P^-1 * A * P = Î›ã‚’è¨ˆç®—ã™ã‚‹ å›ºæœ‰å€¤ï¼šÎ›
+    //ŒÅ—L’l‚ğXV‚·‚é
+    //ËP^-1 * A * P = ƒ©‚ğŒvZ‚·‚é ŒÅ—L’lFƒ©
     //A*P
     calcProduct(eigenvalue,matrixP,matrixTmp);
     copyMatrix(matrixTmp,eigenvalue);
@@ -281,20 +281,20 @@ int calcEigenvalueExe(double eigenvalue[][numOfFeature],double eigenvector[][num
     calcProduct(matrixP,eigenvalue,matrixTmp);
     copyMatrix(matrixTmp,eigenvalue);
 
-    //è¨ˆç®—å¼·åˆ¶çµ‚äº†ï¼š-1ã€€è¨ˆç®—ç¶™ç¶šï¼š1ã‚’return
-    if(counter>=maxNumberOfCalc){    //è¨ˆç®—æ•°ãŒè¦å®šå€¤ã‚’è¶…ãˆãŸå ´åˆï¼Œè¨ˆç®—çµ‚äº†
-        printf("è¨ˆç®—ä¸­æ­¢ï¼ˆè¨ˆç®—æ•°ãŒä¸Šé™ã«é”ã—ã¾ã—ãŸï¼‰\n");
-        fprintf(writeLog,"è¨ˆç®—ä¸­æ­¢ï¼ˆè¨ˆç®—æ•°ãŒä¸Šé™ã«é”ã—ã¾ã—ãŸï¼‰");
+    //ŒvZ‹­§I—¹F-1@ŒvZŒp‘±F1‚ğreturn
+    if(counter>=maxNumberOfCalc){    //ŒvZ”‚ª‹K’è’l‚ğ’´‚¦‚½ê‡CŒvZI—¹
+        printf("ŒvZ’†~iŒvZ”‚ªãŒÀ‚É’B‚µ‚Ü‚µ‚½j\n");
+        fprintf(writeLog,"ŒvZ’†~iŒvZ”‚ªãŒÀ‚É’B‚µ‚Ü‚µ‚½j");
         counter=0;
         return -1;
     }else{
-        printf("è¨ˆç®—æ•°:%5d",counter);
+        printf("ŒvZ”:%5d",counter);
         return 1;
     }
 }
 
-//è¡Œåˆ—åŒå£«ã®æ›ã‘ç®—ã‚’è¡Œã†
-//è¡Œåˆ—left * è¡Œåˆ—right 
+//s—ñ“¯m‚ÌŠ|‚¯Z‚ğs‚¤
+//s—ñleft * s—ñright 
 void calcProduct(double left[][numOfFeature],double right[][numOfFeature],double result[][numOfFeature])   
 {
     int i,j,z;
@@ -305,7 +305,7 @@ void calcProduct(double left[][numOfFeature],double right[][numOfFeature],double
             for(z=0;z<numOfFeature;z++){
                 tmp+=left[i][z]*right[z][j];
             }
-            if(fabs(tmp)<zero){     //ç›®æ¨™ç²¾åº¦ã§ã€ä¸¸ã‚ã‚‹
+            if(fabs(tmp)<zero){     //–Ú•W¸“x‚ÅAŠÛ‚ß‚é
                 result[i][j]=0;
             }else{
                 result[i][j]=tmp;
@@ -314,8 +314,8 @@ void calcProduct(double left[][numOfFeature],double right[][numOfFeature],double
     }
 }
 
-//éå¯¾è§’æˆåˆ†ã®ã†ã¡ï¼Œæœ€å¤§å€¤ã®è¡Œç•ªå·ï¼Œåˆ—ç•ªå·ã‚’è¿”ã™é–¢æ•°
-//å¯¾è±¡è¡Œåˆ—ã®ãŸã‚ï¼Œè¡Œåˆ—ã®å³ä¸Šã®ã¿æ¢ç´¢ã™ã‚‹ã“ã¨ã¨ã™ã‚‹
+//”ñ‘ÎŠp¬•ª‚Ì‚¤‚¿CÅ‘å’l‚Ìs”Ô†C—ñ”Ô†‚ğ•Ô‚·ŠÖ”
+//‘ÎÛs—ñ‚Ì‚½‚ßCs—ñ‚Ì‰Eã‚Ì‚İ’Tõ‚·‚é‚±‚Æ‚Æ‚·‚é
 position_k serchBiggest(double target[][numOfFeature])
 {
     position_k position;
@@ -324,23 +324,23 @@ position_k serchBiggest(double target[][numOfFeature])
     max=-1;
     for(i=0;i<numOfFeature-1;i++){
         for(j=i+1;j<numOfFeature;j++){
-            if(max<fabs(target[i][j])){ //çµ¶å¯¾å€¤ã§æ¯”è¼ƒã™ã‚‹
+            if(max<fabs(target[i][j])){ //â‘Î’l‚Å”äŠr‚·‚é
                 max=fabs(target[i][j]);
                 position.row=i;
                 position.column=j;
             }
         }
     }
-    return position;    //éå¯¾è§’æˆåˆ†ã®ã†ã¡ï¼Œæœ€å¤§å€¤ã®è¡Œç•ªå·ï¼Œåˆ—ç•ªå·ã‚’è¿”ã™
+    return position;    //”ñ‘ÎŠp¬•ª‚Ì‚¤‚¿CÅ‘å’l‚Ìs”Ô†C—ñ”Ô†‚ğ•Ô‚·
 }
 
-//è¡Œåˆ—Pã‚’ä½œæˆã™ã‚‹
-//è¡Œåˆ—Pã¯ï¼Œæœ€åˆã«åˆ¥é–¢æ•°å†…ï¼ˆé–¢æ•°oneWord_calcEigenvalue()ï¼‰ã«ã¦å®£è¨€ã—ãŸmatrixPã‚’åˆ©ç”¨ã™ã‚‹
-//matrixPã¯ï¼Œå˜ä½è¡Œåˆ—ã§ã‚ã‚Šï¼Œãã‚Œã‚’æ›´æ–°ã—ã¦ä½¿ã„ã¾ã‚ã™ã“ã¨ã¨ã™ã‚‹
-//ãã®ãŸã‚ï¼Œå‰å›ã®å ´æ‰€ã‚’staticã«ä¿æŒã—ã¦ç½®ãï¼Œæ–°ã—ã„å€¤ã«æ›´æ–°ã™ã‚‹éš›ã«ï¼Œã‚‚ã†ä¸€åº¦å˜ä½è¡Œåˆ—ã«æˆ»ã™å‡¦ç†ã‚’è¡Œã†
+//s—ñP‚ğì¬‚·‚é
+//s—ñP‚ÍCÅ‰‚É•ÊŠÖ”“àiŠÖ”oneWord_calcEigenvalue()j‚É‚ÄéŒ¾‚µ‚½matrixP‚ğ—˜—p‚·‚é
+//matrixP‚ÍC’PˆÊs—ñ‚Å‚ ‚èC‚»‚ê‚ğXV‚µ‚Äg‚¢‚Ü‚í‚·‚±‚Æ‚Æ‚·‚é
+//‚»‚Ì‚½‚ßC‘O‰ñ‚ÌêŠ‚ğstatic‚É•Û‚µ‚Ä’u‚«CV‚µ‚¢’l‚ÉXV‚·‚éÛ‚ÉC‚à‚¤ˆê“x’PˆÊs—ñ‚É–ß‚·ˆ—‚ğs‚¤
 int createMatrix(double matrixP[][numOfFeature],double eigenvalue[][numOfFeature],int small,int big)
 {
-    static int pastSmall=0,pastBig=1;    //å‰å›ã®ä½ç½®ã‚’ä¿å­˜ã€‚åˆå›(0,1)ãªã®ã¯ï¼Œ(0,0)ã«ã™ã‚‹ã¨1è¡Œ1åˆ—ã®å€¤ãŒæ¶ˆå¤±ã™ã‚‹ãŸã‚
+    static int pastSmall=0,pastBig=1;    //‘O‰ñ‚ÌˆÊ’u‚ğ•Û‘¶B‰‰ñ(0,1)‚È‚Ì‚ÍC(0,0)‚É‚·‚é‚Æ1s1—ñ‚Ì’l‚ªÁ¸‚·‚é‚½‚ß
     double theta;
     matrixP[pastSmall][pastSmall]=1;
     matrixP[pastBig][pastBig]=1;
@@ -348,7 +348,7 @@ int createMatrix(double matrixP[][numOfFeature],double eigenvalue[][numOfFeature
     matrixP[pastBig][pastSmall]=0;
     theta=0.5*atan(2.0*eigenvalue[small][big]/(eigenvalue[big][big]-eigenvalue[small][small]));
     printf(" theta=% 6f ass=% 6f abb=% 6f abs=% 6f asb=% 6f ",theta,eigenvalue[small][small],eigenvalue[big][big],eigenvalue[big][small],eigenvalue[small][big]);
-    if(fabs(eigenvalue[small][big])<zero){  //éå¯¾è§’æˆåˆ†ã®æœ€å¤§å€¤ãŒzero ã«ãªã£ãŸâ†’éå¯¾è§’æˆåˆ†ã¯ã™ã¹ã¦zero â†’eigenvalueã¯ã€å¯¾è§’è¡Œåˆ—
+    if(fabs(eigenvalue[small][big])<zero){  //”ñ‘ÎŠp¬•ª‚ÌÅ‘å’l‚ªzero ‚É‚È‚Á‚½¨”ñ‘ÎŠp¬•ª‚Í‚·‚×‚Äzero ¨eigenvalue‚ÍA‘ÎŠps—ñ
         return -1;
     }
     matrixP[small][small]=cos(theta);
@@ -361,15 +361,15 @@ int createMatrix(double matrixP[][numOfFeature],double eigenvalue[][numOfFeature
     return 1;
 }
 
-//è¡Œåˆ—Pã‚’è»¢ç½®ã—ï¼Œè¡Œåˆ—P^-1ã«ã™ã‚‹å‡¦ç†
-//è¡Œåˆ—Pã¯å¯¾è±¡è¡Œåˆ—ã§ã‚ã‚Šï¼Œå¤‰åŒ–ã•ã›ã‚‹ã®ã¯ï¼Œsinã¨-sinã‚’äº¤æ›ã™ã‚‹ã ã‘ã§ã‚ˆã„
+//s—ñP‚ğ“]’u‚µCs—ñP^-1‚É‚·‚éˆ—
+//s—ñP‚Í‘ÎÛs—ñ‚Å‚ ‚èC•Ï‰»‚³‚¹‚é‚Ì‚ÍCsin‚Æ-sin‚ğŒğŠ·‚·‚é‚¾‚¯‚Å‚æ‚¢
 void turnMatrix(double target[][numOfFeature],int small,int big)
 { 
     target[small][big]=target[small][big]*(-1.0);
     target[big][small]=target[big][small]*(-1.0);
 }
 
-//é…åˆ—ã®ã‚³ãƒ”ãƒ¼
+//”z—ñ‚ÌƒRƒs[
 void copyMatrix(double origin[][numOfFeature],double target[][numOfFeature])
 {
     int i,j;
@@ -380,10 +380,10 @@ void copyMatrix(double origin[][numOfFeature],double target[][numOfFeature])
     }
 }
 
-//å¯¾è§’è¡Œåˆ—ã‹ã©ã†ã‹ç¢ºèªã™ã‚‹ï¼ˆå®Ÿéš›ã¯éå¯¾è§’æˆåˆ†ã®æœ€å¤§å€¤ã‚’ã‚‚ã¨ã«åˆ¤å®šã™ã‚‹å‡¦ç†ã‚’é–¢æ•°createMatrix()ã«å…¥ã‚Œã¦ã„ã‚‹ãŸã‚ï¼Œèª²é¡Œ3ã§ã¯åˆ©ç”¨ã—ãªã„ï¼‰
-//è¡Œåˆ—targetãŒå¯¾è±¡è¡Œåˆ—ã§ã‚ã‚‹å‰æãªã®ã§ï¼Œå³ä¸Šã®éƒ¨åˆ†ãŒã™ã¹ã¦ã‚¼ãƒ­ã§ã‚ã‚‹ã‹ç¢ºèªã‚’è¡Œã†â€»
-//â€»ã‚¼ãƒ­åˆ¤å®šã¯ï¼Œã‚ã‚‰ã‹ã˜ã‚å®šç¾©ã—ãŸzeroæœªæº€ã§ã‚ã‚‹ã‹ã§ç¢ºèª
-//è¿”ã‚Šå€¤ã€€å¯¾è§’è¡Œåˆ—ï¼š1ã€€éå¯¾è§’è¡Œåˆ—ï¼š-1
+//‘ÎŠps—ñ‚©‚Ç‚¤‚©Šm”F‚·‚éiÀÛ‚Í”ñ‘ÎŠp¬•ª‚ÌÅ‘å’l‚ğ‚à‚Æ‚É”»’è‚·‚éˆ—‚ğŠÖ”createMatrix()‚É“ü‚ê‚Ä‚¢‚é‚½‚ßC‰Û‘è3‚Å‚Í—˜—p‚µ‚È‚¢j
+//s—ñtarget‚ª‘ÎÛs—ñ‚Å‚ ‚é‘O’ñ‚È‚Ì‚ÅC‰Eã‚Ì•”•ª‚ª‚·‚×‚Äƒ[ƒ‚Å‚ ‚é‚©Šm”F‚ğs‚¤¦
+//¦ƒ[ƒ”»’è‚ÍC‚ ‚ç‚©‚¶‚ß’è‹`‚µ‚½zero–¢–‚Å‚ ‚é‚©‚ÅŠm”F
+//•Ô‚è’l@‘ÎŠps—ñF1@”ñ‘ÎŠps—ñF-1
 int judgeDiagonal(double target[][numOfFeature])
 {
     int i,j;
@@ -397,8 +397,8 @@ int judgeDiagonal(double target[][numOfFeature])
     return 1;
 }
 
-//ã‚·ã‚§ãƒ«ã‚½ãƒ¼ãƒˆ
-//numOfFeatureæ–‡ã®1æ¬¡å…ƒé…åˆ—ã‚’ä¸¦ã³æ›¿ãˆã‚‹
+//ƒVƒFƒ‹ƒ\[ƒg
+//numOfFeature•¶‚Ì1ŸŒ³”z—ñ‚ğ•À‚Ñ‘Ö‚¦‚é
 void shellSort(double myData[],double eigenvalue[][numOfFeature],double eigenvector[][numOfFeature])
 {
     int i,j,z;
@@ -406,11 +406,11 @@ void shellSort(double myData[],double eigenvalue[][numOfFeature],double eigenvec
     int saveOrder[196];
     double tmp[196][196];
     int nextOrder;
-    for(i=0;i<numOfFeature;i++)saveOrder[i]=i;  //é †ç•ªã‚’ã‚»ãƒƒãƒˆ
+    for(i=0;i<numOfFeature;i++)saveOrder[i]=i;  //‡”Ô‚ğƒZƒbƒg
     pickDiagonal(myData,eigenvalue);
-	while(group*3+1<numOfFeature)group=group*3+1;	//ãƒšã‚¢ã®å€‹æ•°
+	while(group*3+1<numOfFeature)group=group*3+1;	//ƒyƒA‚ÌŒÂ”
 	while(group>=1){
-		member=numOfFeature/group;	//ãƒšã‚¢ã®ä¸­ã®æ•°å€¤ã®å€‹æ•°
+		member=numOfFeature/group;	//ƒyƒA‚Ì’†‚Ì”’l‚ÌŒÂ”
 		for(z=0;z<group;z++){
 			for(i=1;i<=member-1;i++){
 				dist=z+group*i;
@@ -440,7 +440,7 @@ void shellSort(double myData[],double eigenvalue[][numOfFeature],double eigenvec
 }
 
 
-//å¯¾è§’è¡Œåˆ—ã®å¯¾è§’æˆåˆ†ã®ã¿ã‚’1æ¬¡å…ƒè¡Œåˆ—ã«å…¥ã‚Œã‚‹
+//‘ÎŠps—ñ‚Ì‘ÎŠp¬•ª‚Ì‚İ‚ğ1ŸŒ³s—ñ‚É“ü‚ê‚é
 void pickDiagonal(double mydata[],double eigenvalue[][numOfFeature])
 {
     int i;
@@ -449,11 +449,11 @@ void pickDiagonal(double mydata[],double eigenvalue[][numOfFeature])
     }
 }
 
-//ãƒãƒãƒ©ãƒãƒ“ã‚¹è·é›¢ã‚’è¨ˆç®—ã—ãŸçµæœã‚’ã¾ã¨ã‚ï¼Œã‚‚ã£ã¨ã‚‚ã‚‰ã—ã„æ–‡å­—ã‚’è¿”ã™ã€‚
-//ã€Œã‚ã€ï¼š0ã€€ï½ã€€ã€Œã‚“ã€ï¼š45
+//ƒ}ƒnƒ‰ƒmƒrƒX‹——£‚ğŒvZ‚µ‚½Œ‹‰Ê‚ğ‚Ü‚Æ‚ßC‚à‚Á‚Æ‚à‚ç‚µ‚¢•¶š‚ğ•Ô‚·B
+//u‚ vF0@`@u‚ñvF45
 int mahalanobis(double rawData[])
 {
-    int result=0; //èªè­˜çµæœã®æ–‡å­—ã‚’è¿”ã™
+    int result=0; //”F¯Œ‹‰Ê‚Ì•¶š‚ğ•Ô‚·
     int i,j;
     char fnvalue[40],fnvector[40],fnaverage[40];
     double min=DBL_MAX,now;
@@ -466,7 +466,7 @@ int mahalanobis(double rawData[])
         readDataLine(sortedvalue,fnvalue,numOfData);
         readData(sortedvector,fnvector,numOfFeature,numOfFeature);
         readDataLine(average,fnaverage,numOfData);
-        now=calcMahalanobis(rawData,sortedvalue,sortedvector,average);
+        now=calcMahalanobis(i,rawData,sortedvalue,sortedvector,average);
 //        printf("now = %lf    min = %lf \n",now,min);
         if(now<min){
             min = now;
@@ -476,8 +476,8 @@ int mahalanobis(double rawData[])
     return result;
 }
 
-//ãƒãƒãƒ©ãƒãƒ“ã‚¹è·é›¢ã‚’è¨ˆç®—ã™ã‚‹
-double calcMahalanobis(double rawData[],double sortedvalue[],double sortedvector[][numOfFeature],double average[])
+//ƒ}ƒnƒ‰ƒmƒrƒX‹——£‚ğŒvZ‚·‚é
+double calcMahalanobis(int now,double rawData[],double sortedvalue[],double sortedvector[][numOfFeature],double average[])
 {
     int i,j,z,k;
     double d,child;
@@ -486,6 +486,7 @@ double calcMahalanobis(double rawData[],double sortedvalue[],double sortedvector
         child=0;
         for(i=0;i<teisuOfN;i++){
             child+=(rawData[i]-average[i])*sortedvector[i][k];
+	printf("[%d,%d,%d] fake = %lf vector = %lf rawData = %lf average = %lf\n",now,k,i,child,sortedvector[i][k],rawData[i],average[i]);
         }
         child = child * child;
         if(sortedvalue[k]>teisuOfB){
